@@ -10,6 +10,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ open, setOpen }: AuthModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
 
   useEffect(() => {
     setMounted(true);
@@ -26,7 +27,7 @@ export default function AuthModal({ open, setOpen }: AuthModalProps) {
         >
           ✕
         </button>
-        <h2 className="text-xl font-bold mb-4">Login</h2>
+        <h2 className="text-xl font-bold mb-4">{authMode === 'login' ? 'Login' : 'Register'}</h2>
         <form className="space-y-4">
           <div>
             <label className="block text-sm font-medium">Email</label>
@@ -44,17 +45,31 @@ export default function AuthModal({ open, setOpen }: AuthModalProps) {
               placeholder="Enter your password"
             />
           </div>
+          {authMode === 'register' && (
+            <div>
+              <label className="block text-sm font-medium">Confirm Password</label>
+              <input
+                type="password"
+                className="mt-1 block w-full border rounded-lg px-3 py-2"
+                placeholder="Confirm your password"
+              />
+            </div>
+          )}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
           >
-            Login
+            {authMode === 'login' ? 'Login' : 'Create Account'}
           </button>
           <p className="text-sm text-center">
-            Don’t have an account?{" "}
-            <a href="#" className="text-blue-600 hover:underline">
-              Register
-            </a>
+            {authMode === 'login' ? "Don’t have an account? " : "Already have an account? "}
+            <button 
+              type="button" 
+              onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} 
+              className="text-blue-600 hover:underline"
+            >
+              {authMode === 'login' ? 'Register' : 'Login'}
+            </button>
           </p>
         </form>
       </div>

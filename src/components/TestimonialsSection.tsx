@@ -1,7 +1,35 @@
 'use client';
 
-import { useState, useEffect, FC } from 'react';
+import { useState, useEffect, FC, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+// Corrected useOnScreen hook
+const useOnScreen = (options: IntersectionObserverInit) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.unobserve(entry.target);
+            }
+        }, options);
+
+        const currentRef = ref.current;
+        if (currentRef) {
+            observer.observe(currentRef);
+        }
+
+        return () => {
+            if (currentRef) {
+                observer.unobserve(currentRef);
+            }
+        };
+    }, [ref, options]);
+
+    return [ref, isVisible] as const;
+};
 
 const testimonials = [
     { quote: "The UI/UX course was a game-changer for my career. The instructors were incredibly knowledgeable and supportive.", name: "Sarah Johnson", title: "Product Designer", avatar: "https://i.pravatar.cc/80?img=1" },
@@ -12,19 +40,18 @@ const testimonials = [
 const TestimonialsSection: FC = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
+    // Removed the incorrect `triggerOnce` property
+    const [sectionRef, isSectionVisible] = useOnScreen({ threshold: 0.1 });
 
-    // Effect for auto-sliding
     useEffect(() => {
-        // Only run the interval if it's not paused
         if (!isPaused) {
             const slideInterval = setInterval(() => {
                 goToNext();
-            }, 5000); // Change slide every 5 seconds
+            }, 5000); 
 
-            // Clean up the interval when the component unmounts or currentIndex changes
             return () => clearInterval(slideInterval);
         }
-    }, [currentIndex, isPaused]); // Rerun effect if currentIndex or isPaused changes
+    }, [currentIndex, isPaused]);
 
     const goToPrevious = () => {
         const isFirstSlide = currentIndex === 0;
@@ -43,7 +70,11 @@ const TestimonialsSection: FC = () => {
     };
 
     return (
-        <section id="testimonials" className="py-20 overflow-x-hidden">
+        <section 
+            id="testimonials" 
+            ref={sectionRef}
+            className={`py-20 overflow-x-hidden transition-all duration-1000 ease-out ${isSectionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+        >
             <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-4xl font-serif font-bold text-text-main">Loved by Learners Worldwide</h2>
@@ -52,8 +83,8 @@ const TestimonialsSection: FC = () => {
                 
                 <div 
                     className="relative max-w-3xl mx-auto"
-                    onMouseEnter={() => setIsPaused(true)} // Pause on hover
-                    onMouseLeave={() => setIsPaused(false)} // Resume on mouse leave
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
                 >
                     <div className="relative min-h-[26rem] w-full">
                         {testimonials.map((testimonial, index) => (

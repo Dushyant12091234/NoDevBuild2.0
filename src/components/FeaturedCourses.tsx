@@ -1,9 +1,38 @@
-import type { FC } from 'react';
+'use client';
+
+import { useState, useEffect, useRef, FC } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import type { Course } from './CourseCard'; // Assuming CourseCard.tsx exists and exports this type
+import type { Course } from './CourseCard';
 
-// Data for the featured courses
+// A simple hook to detect when an element is visible
+const useOnScreen = (options: IntersectionObserverInit) => {
+    const ref = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.unobserve(entry.target);
+            }
+        }, options);
+
+        const currentRef = ref.current;
+        if (currentRef) {
+            observer.observe(currentRef);
+        }
+
+        return () => {
+            if (currentRef) {
+                observer.unobserve(currentRef);
+            }
+        };
+    }, [ref, options]);
+
+    return [ref, isVisible] as const;
+};
+
 const featuredCourses: Course[] = [
   { 
     id: 'mastering-ui-ux-design', 
@@ -38,48 +67,49 @@ const featuredCourses: Course[] = [
 ];
 
 const FeaturedCourses: FC = () => {
+    const [titleRef, isTitleVisible] = useOnScreen({ threshold: 0.1 });
+    const [cardsRef, areCardsVisible] = useOnScreen({ threshold: 0.1 });
+    
     return (
-        <section className="pt-0 pb-20">
+        <section className="pt-20 pb-20">
             <div className="container mx-auto px-6">
-                <div className="flex flex-col text-center md:flex-row md:text-left justify-between items-center mb-12">
-                    <div>
-                        <h2 className="text-4xl font-serif font-bold text-text-main">Featured Courses</h2>
-                        <p className="text-text-muted mt-2">Start your learning journey with our most popular courses.</p>
+                <div 
+                    ref={titleRef}
+                    className={`transition-all duration-700 ease-out py-16 ${isTitleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                >
+                    <div className="flex flex-col text-center md:flex-row md:text-left justify-between items-center mb-12">
+                        <div>
+                            <h2 className="text-4xl font-serif font-bold text-text-main">Featured Courses</h2>
+                            <p className="text-text-muted mt-2">Start your learning journey with our most popular courses.</p>
+                        </div>
+                        <Link href="/courses" className="hidden md:flex items-center gap-2 mt-4 md:mt-0 text-sm font-semibold text-text-muted hover:text-primary transition-colors group">
+                            View All Courses <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </Link>
                     </div>
-                    <Link href="/courses" className="hidden md:flex items-center gap-2 mt-4 md:mt-0 text-sm font-semibold text-text-muted hover:text-primary transition-colors group">
-                        View All Courses <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
                 </div>
                 
-                {/* --- NEW Simplified Card Grid --- */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {featuredCourses.map((course) => (
-                        <Link href={`/courses/${course.id}`} key={course.id} className="block group">
-                            <div className="relative rounded-2xl overflow-hidden h-96 border border-border transition-all duration-300 hover:border-secondary hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-2">
-                                {/* Background Image */}
-                                <img 
-                                    src={course.image} 
-                                    alt={course.title} 
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                />
-                                {/* Gradient Overlay for text readability */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                                
-                                {/* Text Content positioned at the bottom */}
-                                <div className="relative h-full flex flex-col justify-end p-6 text-left">
-                                    <span className={`text-sm font-semibold text-${course.color}`}>{course.category}</span>
-                                    <h3 className="text-2xl font-bold mt-1 text-primary">{course.title}</h3>
+                <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {featuredCourses.map((course, index) => (
+                        <div 
+                            key={course.id}
+                            className={`transition-all duration-700 ease-out ${areCardsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                            style={{ transitionDelay: `${index * 150}ms` }}
+                        >
+                            <Link href={`/courses/${course.id}`} className="block group h-full">
+                                <div className="relative rounded-2xl overflow-hidden h-96 border border-border transition-all duration-300 hover:border-secondary hover:shadow-2xl hover:shadow-secondary/10 hover:-translate-y-2">
+                                    <img 
+                                        src={course.image} 
+                                        alt={course.title} 
+                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                    />
+                                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-black/60 backdrop-blur-sm">
+                                        <span className="text-sm font-semibold text-gray-300">{course.category}</span>
+                                        <h3 className="text-2xl font-bold mt-1 text-white">{course.title}</h3>
+                                    </div>
                                 </div>
-                            </div>
-                        </Link>
+                            </Link>
+                        </div>
                     ))}
-                </div>
-                 <div className="text-center mt-12 md:hidden">
-                    <Link href="/courses">
-                        <button className="px-8 py-3 bg-primary/10 border border-primary/20 text-primary font-bold rounded-full hover:bg-primary hover:text-background transition-all duration-300">
-                            View All Courses
-                        </button>
-                    </Link>
                 </div>
             </div>
         </section>
