@@ -4,13 +4,12 @@
 .aurora-background {
   background-image: radial-gradient(
       ellipse 80% 80% at 50% -20%,
-      rgba(142, 45, 226, 0.2), /* secondary color */
+      rgba(138, 43, 226, 0.15), /* secondary color (purple) */
       rgba(255, 255, 255, 0)
     ),
     radial-gradient(
       ellipse 80% 80% at 50% 120%,
-      rgba(0, 169, 255, 0.2), /* primary color */
+      rgba(0, 191, 255, 0.15),  /* accent color (blue) */
       rgba(255, 255, 255, 0)
     );
 }
-
