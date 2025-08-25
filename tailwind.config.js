@@ -7,31 +7,39 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'background': '#000000',      // True black for a sleek look
-        'primary': '#FAFAFA',         // Off-white for primary text and elements
-        'secondary': '#8A2BE2',       // A vibrant blue-violet
-        'accent': '#32CD32',          // A bright lime green for accents
-        'text-main': '#EAEAEA',       // Light gray for main text
-        'text-muted': '#A9A9A9',      // Softer gray for secondary text
+        'background': '#000000',
+        'primary': '#FAFAFA',
+        'secondary': '#8A2BE2',
+        'accent': '#32CD32',
+        'text-main': '#EAEAEA',
+        'text-muted': '#A9A9A9',
         'card': 'rgba(255, 255, 255, 0.05)',
         'border': 'rgba(255, 255, 255, 0.1)',
       },
       fontFamily: {
-        // Using more modern, stylish fonts
         sans: ['"Space Grotesk"', 'sans-serif'],
         serif: ['"DM Serif Display"', 'serif'],
       },
       cursor: {
-        // Defining a custom cursor
         'fancy': 'url(/cursor.svg), auto',
       },
       animation: {
         'aurora': 'aurora 60s linear infinite',
+        // This combined animation is for the hero image
+        'hero-visual': 'fade-in-up 0.8s ease-out forwards, float 4s ease-in-out infinite 0.8s',
       },
       keyframes: {
         aurora: {
           from: { backgroundPosition: '50% 50%, 50% 50%' },
           to: { backgroundPosition: '350% 50%, 350% 50%' },
+        },
+        'fade-in-up': {
+          'from': { opacity: '0', transform: 'translateY(20px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-15px)' },
         },
       },
     },

@@ -1,26 +1,26 @@
 import Link from 'next/link';
 import type { FC } from 'react';
+import { MoveRight } from 'lucide-react';
 
 const Hero: FC = () => {
   return (
-   <section className="container mx-auto px-6 pt-48 pb-32 text-center relative z-10">
-     
+    // Reduced bottom padding from pb-32 to pb-16 to fix the spacing issue
+    <section className="container mx-auto px-6 pt-32 pb-16 text-center relative z-10">
       <h1 className="text-6xl md:text-8xl font-serif font-bold mb-6 leading-tight gradient-text">
         Unlock Your Creative Potential
       </h1>
       <p className="text-lg text-text-muted max-w-3xl mx-auto mb-10 font-sans">
         Explore a universe of knowledge with our expert-led courses. From design to development, we provide the tools to launch your career into the stratosphere.
       </p>
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center items-center gap-4">
         <Link href="/courses">
-          <button className="px-8 py-3 bg-primary rounded-full text-background font-bold hover:bg-accent hover:text-black transition-all duration-300 transform hover:scale-105">
-            Explore Courses
+          <button className="px-8 py-3 bg-primary rounded-full text-background font-bold hover:bg-accent hover:text-black transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2">
+            Explore Courses <MoveRight className="w-5 h-5" />
           </button>
         </Link>
       </div>
     </section>
-  
-
   );
 };
+
 export default Hero;

@@ -1,35 +1,105 @@
-import type { FC } from 'react';
+'use client';
+
+import { useState, useEffect, FC } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const testimonials = [
-    { quote: "The UI/UX course was a game-changer for my career. The instructors were incredibly knowledgeable and supportive.", name: "Sarah Johnson", title: "Product Designer", avatar: "https://i.pravatar.cc/40?img=1" },
-    { quote: "I went from knowing nothing about code to building my own web applications. Highly recommended!", name: "Michael Chen", title: "Full-Stack Developer", avatar: "https://i.pravatar.cc/40?img=2" },
-    { quote: "The marketing masterclass gave me the confidence and skills to launch my own successful online business.", name: "Jessica Rodriguez", title: "Entrepreneur", avatar: "https://i.pravatar.cc/40?img=3" }
+    { quote: "The UI/UX course was a game-changer for my career. The instructors were incredibly knowledgeable and supportive.", name: "Sarah Johnson", title: "Product Designer", avatar: "https://i.pravatar.cc/80?img=1" },
+    { quote: "I went from knowing nothing about code to building my own web applications. Highly recommended!", name: "Michael Chen", title: "Full-Stack Developer", avatar: "https://i.pravatar.cc/80?img=2" },
+    { quote: "The marketing masterclass gave me the confidence and skills to launch my own successful online business.", name: "Jessica Rodriguez", title: "Entrepreneur", avatar: "https://i.pravatar.cc/80?img=3" }
 ];
 
 const TestimonialsSection: FC = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+
+    // Effect for auto-sliding
+    useEffect(() => {
+        // Only run the interval if it's not paused
+        if (!isPaused) {
+            const slideInterval = setInterval(() => {
+                goToNext();
+            }, 5000); // Change slide every 5 seconds
+
+            // Clean up the interval when the component unmounts or currentIndex changes
+            return () => clearInterval(slideInterval);
+        }
+    }, [currentIndex, isPaused]); // Rerun effect if currentIndex or isPaused changes
+
+    const goToPrevious = () => {
+        const isFirstSlide = currentIndex === 0;
+        const newIndex = isFirstSlide ? testimonials.length - 1 : currentIndex - 1;
+        setCurrentIndex(newIndex);
+    };
+
+    const goToNext = () => {
+        const isLastSlide = currentIndex === testimonials.length - 1;
+        const newIndex = isLastSlide ? 0 : currentIndex + 1;
+        setCurrentIndex(newIndex);
+    };
+    
+    const goToSlide = (slideIndex: number) => {
+        setCurrentIndex(slideIndex);
+    };
+
     return (
-        <section id="testimonials" className="py-20 bg-secondary/10">
+        <section id="testimonials" className="py-20 overflow-x-hidden">
             <div className="container mx-auto px-6">
-                <div className="text-center mb-12">
-                    <h2 className="text-4xl font-serif font-bold text-text-main">What Our Students Say</h2>
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl font-serif font-bold text-text-main">Loved by Learners Worldwide</h2>
                     <p className="text-text-muted mt-2">Real stories from our amazing community.</p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {testimonials.map((testimonial, index) => (
-                        <div key={index} className="bg-card p-6 rounded-xl border border-border">
-                            <p className="text-text-muted italic">"{testimonial.quote}"</p>
-                            <div className="flex items-center mt-4">
-                                <img src={testimonial.avatar} alt={testimonial.name} className="w-10 h-10 rounded-full" />
-                                <div className="ml-4">
-                                    <p className="font-bold text-text-main">{testimonial.name}</p>
-                                    <p className="text-sm text-text-muted">{testimonial.title}</p>
-                                </div>
+                
+                <div 
+                    className="relative max-w-3xl mx-auto"
+                    onMouseEnter={() => setIsPaused(true)} // Pause on hover
+                    onMouseLeave={() => setIsPaused(false)} // Resume on mouse leave
+                >
+                    <div className="relative min-h-[26rem] w-full">
+                        {testimonials.map((testimonial, index) => (
+                            <div 
+                                key={index}
+                                className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+                                    index === currentIndex ? 'opacity-100' : 'opacity-0'
+                                }`}
+                            >
+                                {index === currentIndex && (
+                                    <div className="bg-card/50 backdrop-blur-lg p-8 md:p-12 rounded-2xl border border-border h-full flex flex-col justify-center items-center text-center shadow-2xl shadow-secondary/10">
+                                        <img src={testimonial.avatar} alt={testimonial.name} className="w-24 h-24 rounded-full border-4 border-secondary object-cover mb-6"/>
+                                        <p className="text-xl md:text-2xl text-text-main mb-4 italic leading-relaxed">"{testimonial.quote}"</p>
+                                        <div>
+                                            <p className="font-bold text-lg text-primary">{testimonial.name}</p>
+                                            <p className="text-md text-text-muted">{testimonial.title}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
+
+                    <button onClick={goToPrevious} className="absolute top-1/2 -translate-y-1/2 -left-4 md:-left-20 p-3 bg-card rounded-full border border-border hover:bg-secondary transition-colors duration-300 z-10">
+                        <ChevronLeft className="w-6 h-6 text-primary" />
+                    </button>
+                    <button onClick={goToNext} className="absolute top-1/2 -translate-y-1/2 -right-4 md:-right-20 p-3 bg-card rounded-full border border-border hover:bg-secondary transition-colors duration-300 z-10">
+                        <ChevronRight className="w-6 h-6 text-primary" />
+                    </button>
+
+                    <div className="flex justify-center gap-3 mt-8">
+                        {testimonials.map((_, slideIndex) => (
+                            <button 
+                                key={slideIndex} 
+                                onClick={() => goToSlide(slideIndex)}
+                                aria-label={`Go to slide ${slideIndex + 1}`}
+                                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                    currentIndex === slideIndex ? 'bg-primary scale-125' : 'bg-border hover:bg-border/70'
+                                }`}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>
     );
 };
+
 export default TestimonialsSection;

@@ -1,19 +1,10 @@
-'use client'; // This directive marks the component as a Client Component
+'use client';
 
-import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import type { FC } from 'react';
+import { useState, useMemo, FC, ReactElement } from 'react';
+import { LayoutGrid, PenTool, Code, Megaphone, Search } from 'lucide-react';
+import CourseCard, { Course } from './CourseCard'; // Import the new component
 
-type Course = {
-  id: string;
-  category: string;
-  title: string;
-  description: string;
-  price: string;
-  image: string;
-  color: string;
-};
-
+// --- DATA ---
 const allCourses: Course[] = [
   { 
     id: 'mastering-ui-ux-design', 
@@ -22,7 +13,8 @@ const allCourses: Course[] = [
     description: 'A deep dive into user-centric design principles, wireframing, and prototyping with Figma.', 
     price: '$99', 
     image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=800&q=60', 
-    color: 'primary' 
+    color: 'secondary',
+    level: 'Intermediate'
   },
   { 
     id: 'web-developer-bootcamp', 
@@ -30,8 +22,9 @@ const allCourses: Course[] = [
     title: 'The Complete Web Developer Bootcamp', 
     description: 'From HTML to React, learn everything you need to become a full-stack developer.', 
     price: '$149', 
-    image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=60', 
-    color: 'secondary' 
+    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=60', 
+    color: 'primary',
+    level: 'Beginner'
   },
   { 
     id: 'digital-marketing-masterclass', 
@@ -40,48 +33,72 @@ const allCourses: Course[] = [
     description: 'Master SEO, content strategy, and social media to grow any business online.', 
     price: '$79', 
     image: 'https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&w=800&q=60', 
-    color: 'accent' 
+    color: 'accent',
+    level: 'All Levels'
   },
 ];
 
-const CourseCard: FC<{ course: Course }> = ({ course }) => (
-  <div className="bg-card rounded-xl overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 group h-full flex flex-col border border-border hover:border-primary">
-    <div className="overflow-hidden">
-        <img 
-          src={course.image} 
-          alt={course.title} 
-          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500" 
-          // Add a fallback placeholder image in case the Unsplash link fails
-          onError={(e) => { e.currentTarget.src = `https://placehold.co/600x400/0B0713/FFF?text=Image+Not+Found`; }}
-        />
-    </div>
-    <div className="p-6 flex flex-col flex-grow">
-      <span className={`text-sm font-semibold text-${course.color}`}>{course.category}</span>
-      <h3 className="text-xl font-bold mt-2 mb-3 text-text-main">{course.title}</h3>
-      <p className="text-text-muted mb-4 text-sm flex-grow">{course.description}</p>
-      <div className="flex justify-between items-center border-t border-border pt-4 mt-auto">
-        <p className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{course.price}</p>
-        <div className="flex items-center gap-2 text-sm font-semibold text-text-muted group-hover:text-primary transition-colors">View Course <ArrowRight className="w-4 h-4" /></div>
-      </div>
-    </div>
-  </div>
-);
+const categories: { name: string; icon: ReactElement }[] = [
+    { name: 'All', icon: <LayoutGrid className="w-4 h-4" /> },
+    { name: 'Design', icon: <PenTool className="w-4 h-4" /> },
+    { name: 'Development', icon: <Code className="w-4 h-4" /> },
+    { name: 'Marketing', icon: <Megaphone className="w-4 h-4" /> }
+];
 
+// --- COMPONENT ---
 const AllCourses: FC = () => {
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const filteredCourses = useMemo(() => {
+    if (activeCategory === 'All') return allCourses;
+    return allCourses.filter(course => course.category === activeCategory);
+  }, [activeCategory]);
+
   return (
     <div className="container mx-auto px-6 py-12">
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-serif font-bold">All Courses</h1>
-        <p className="text-text-muted mt-2">Find the perfect course to expand your skills.</p>
+      <div className="text-center pt-8 pb-12 mb-12 border-b border-border">
+        <h1 className="text-5xl md:text-6xl font-serif font-bold mb-4 gradient-text">
+          Explore Our Universe of Courses
+        </h1>
+        <p className="text-lg text-text-muted max-w-3xl mx-auto mb-8">
+          Dive into expert-led courses in design, development, and marketing. Your path to mastery begins with a single click.
+        </p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto">
+          <div className="flex justify-center flex-wrap gap-2">
+            {categories.map(category => (
+              <button
+                key={category.name}
+                onClick={() => setActiveCategory(category.name)}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+                  activeCategory === category.name 
+                    ? 'bg-primary text-background shadow-glow-primary' 
+                    : 'bg-card text-text-muted hover:bg-border hover:text-text-main'
+                }`}
+              >
+                {category.icon}
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
+          <div className="relative w-full md:w-auto">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search courses..."
+              className="w-full md:w-64 bg-card border border-border rounded-full pl-12 pr-4 py-2.5 text-text-main focus:outline-none focus:ring-2 focus:ring-secondary"
+            />
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {allCourses.map((course) => (
-          <Link href={`/courses/${course.id}`} key={course.id} className="block h-full">
-              <CourseCard course={course} />
-          </Link>
-        ))}
+      <div className="flex flex-col gap-8 max-w-4xl mx-auto">
+        {filteredCourses.length > 0 ? (
+          filteredCourses.map(course => <CourseCard key={course.id} course={course} />)
+        ) : (
+          <p className="text-center text-text-muted py-10">No courses found in this category.</p>
+        )}
       </div>
     </div>
   );
 };
+
 export default AllCourses;
